@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>PS4 VR Fun World</title>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; }
+      #info { position: absolute; top: 10px; left: 10px; color: white; z-index: 10; font-family: sans-serif; }
+    </style>
+  </head>
+  <body>
+    <div id="info">Use your PS4 controller to move and look around! 🎮</div>
+    <a-scene>
+      <!-- Sky and ground -->
+      <a-sky color="#6EBAA7"></a-sky>
+      <a-plane color="#7BC8A4" rotation="-90 0 0" width="50" height="50"></a-plane>
+
+      <!-- Player camera -->
+      <a-entity id="player" position="0 1.6 0">
+        <a-camera wasd-controls-enabled="false"></a-camera>
+      </a-entity>
+
+      <!-- Fun cubes to interact with -->
+      <a-box position="2 1 -3" color="#4CC3D9" rotation="0 45 0" dynamic-body></a-box>
+      <a-box position="-2 1 -5" color="#EF2D5E" rotation="0 30 0" dynamic-body></a-box>
+      <a-box position="0 1 -7" color="#FFC65D" rotation="0 60 0" dynamic-body></a-box>
+
+      <!-- Some floating spheres to collect -->
+      <a-sphere position="3 2 -6" radius="0.5" color="#FF0000" id="collect1"></a-sphere>
+      <a-sphere position="-3 2 -4" radius="0.5" color="#00FF00" id="collect2"></a-sphere>
+      <a-sphere position="0 2 -8" radius="0.5" color="#0000FF" id="collect3"></a-sphere>
+    </a-scene>
+
+    <script>
+      // Player movement via PS4 controller
+      const player = document.getElementById('player');
+      let gamepadIndex = null;
+
+      window.addEventListener("gamepadconnected", (e) => {
+        console.log("Gamepad connected:", e.gamepad);
+        gamepadIndex = e.gamepad.index;
+      });
+
+      function update() {
+        if (gamepadIndex !== null) {
+          const gp = navigator.getGamepads()[gamepadIndex];
+          if (gp) {
+            // Left stick: move
+            let x = gp.axes[0]; // left-right
+            let z = gp.axes[1]; // forward-back
+            let moveSpeed = 0.1;
+            player.object3D.position.x += x * moveSpeed;
+            player.object3D.position.z += z * moveSpeed;
+
+            // Right stick: rotate camera
+            let rx = gp.axes[2];
+            let ry = gp.axes[3];
+            player.object3D.rotation.y -= rx * 0.05;
+            player.object3D.rotation.x -= ry * 0.05;
+          }
+        }
+        requestAnimationFrame(update);
+      }
+
+      update();
+
+      // Simple "collect" interaction
+      const spheres = ["collect1","collect2","collect3"];
+      spheres.forEach(id=>{
+        const s = document.getElementById(id);
+        s.addEventListener('click', ()=>{
+          s.setAttribute('visible','false');
+          alert("You collected a sphere! 🎉");
+        });
+      });
+    </script>
+  </body>
+</html>
